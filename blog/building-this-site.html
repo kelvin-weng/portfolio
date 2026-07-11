@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How I Built and Hosted This Site — Kelvin Weng</title>
+<meta name="description" content="How this site was designed with Claude, the bugs that only showed up sometimes, and how it's hosted on GitHub Pages with a custom domain via Cloudflare.">
+<meta name="theme-color" content="#FBF8F3">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesque:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --canvas:#FBF8F3;
+    --surface:#fff;
+    --ink:#1B1712;
+    --muted:#6F655B;
+    --subtle:#453D34;
+    --coral-red:#FF7066;
+    --crimson:#EA1723;
+    --line:#EAE3D8;
+    --chip-bg:#F2ECE2;
+    --photo-bg:#EEE6DB;
+    --photo-line:#E4DAC9;
+    --photo-text:#B0A493;
+    --footer-ink:#1B1712;
+    --footer-text:#F3EDE4;
+    --footer-muted:#9C9084;
+    --footer-link:#D6CDBF;
+    --footer-rule:#8A7C6F;
+    --font-display:'Schibsted Grotesk',sans-serif;
+    --font-body:'Hanken Grotesque',system-ui,sans-serif;
+    --font-mono:ui-monospace,'SF Mono',Menlo,monospace;
+    --max:1120px;
+    --pad:32px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{
+    scroll-behavior:smooth;
+    scroll-padding-top:88px;
+  }
+
+  body{
+    margin:0;
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background:var(--coral-red); color:#fff; }
+  a{ text-decoration:none; }
+  img{ max-width:100%; display:block; }
+
+  .skip-link{
+    position:absolute; left:-9999px; top:0;
+    background:var(--ink); color:#fff; padding:12px 20px;
+    border-radius:0 0 8px 0; z-index:100; font-size:14px;
+  }
+  .skip-link:focus{ left:0; }
+
+  .container{ max-width:var(--max); margin:0 auto; padding:0 var(--pad); }
+
+  section{ padding:44px 0 16px; }
+
+  /* ===== NAV ===== */
+  .nav{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:blur(10px);
+    background:rgba(251,248,243,.92);
+    border-bottom:1px solid #EEE7DC;
+  }
+  .nav-inner{
+    max-width:var(--max); margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px var(--pad);
+    gap:16px;
+  }
+  .brand{
+    font-family:var(--font-display); font-weight:700; font-size:23px;
+    letter-spacing:-.02em; color:var(--ink); flex-shrink:0;
+  }
+  .brand .dot{ color:var(--coral-red); }
+  .nav-links{
+    display:flex; align-items:center; gap:28px;
+    font-size:15px; font-weight:500; color:var(--muted);
+  }
+  .nav-links a{ color:inherit; }
+  .nav-links a:hover{ color:var(--ink); }
+  .nav-links a.is-active{ color:var(--ink); }
+  .nav-cta{
+    background:var(--ink); color:#fff; border:none; border-radius:999px;
+    padding:10px 20px; font:600 14px/1 var(--font-body); cursor:pointer;
+    flex-shrink:0; white-space:nowrap;
+  }
+  .nav-toggle{
+    display:none;
+    background:none; border:1px solid var(--line); border-radius:9px;
+    width:34px; height:34px; padding:0; cursor:pointer;
+    align-items:center; justify-content:center; flex-shrink:0;
+    transition:border-color .2s ease;
+  }
+  .nav-toggle:hover{ border-color:#D8CBB8; }
+  .nav-toggle span,
+  .nav-toggle::before,
+  .nav-toggle::after{
+    content:""; display:block; width:16px; height:2px;
+    background:var(--ink); position:relative;
+    transition:transform .32s cubic-bezier(.34,1.56,.64,1), opacity .18s ease;
+  }
+  .nav-toggle::before{ position:absolute; transform:translateY(-5px); }
+  .nav-toggle::after{ position:absolute; transform:translateY(5px); }
+  .nav-toggle[aria-expanded="true"] span{ opacity:0; transform:scaleX(0); }
+  .nav-toggle[aria-expanded="true"]::before{ transform:translateY(0) rotate(45deg); }
+  .nav-toggle[aria-expanded="true"]::after{ transform:translateY(0) rotate(-45deg); }
+
+  .nav-mobile-inner{
+    overflow:hidden; min-height:0;
+  }
+
+  .nav-mobile-panel{
+    display:grid;
+    grid-template-rows:0fr;
+    opacity:0;
+    transition:grid-template-rows .38s cubic-bezier(.34,1.56,.64,1), opacity .28s ease;
+  }
+  .nav-mobile-panel.is-open{
+    grid-template-rows:1fr;
+    opacity:1;
+  }
+
+  @media (max-width:820px){
+    .nav-links{ display:none; }
+    .nav-cta{ display:none; }
+    .nav-toggle{ display:flex; }
+
+    .nav-mobile-panel{
+      position:absolute; top:100%; left:0; right:0; z-index:15;
+      border-top:1px solid #EEE7DC;
+      background:var(--canvas);
+      box-shadow:0 16px 24px -18px rgba(27,23,18,.18);
+      max-height:calc(100vh - 100%);
+      overflow-y:auto;
+    }
+    .nav-mobile-inner{
+      padding:0 var(--pad);
+      display:flex; flex-direction:column;
+    }
+    .nav-mobile-panel a:first-child{ margin-top:10px; }
+    .nav-mobile-panel a{
+      color:var(--ink); font-size:16px; font-weight:500;
+      padding:14px 0; border-bottom:1px solid var(--line);
+      opacity:0; transform:translateY(-6px);
+      transition:opacity .28s ease, transform .28s ease;
+    }
+    .nav-mobile-panel a:last-of-type{ border-bottom:none; }
+    .nav-mobile-panel .nav-cta{
+      display:block; width:100%; text-align:center; margin-top:14px; margin-bottom:18px;
+      opacity:0; transform:translateY(-6px);
+      transition:opacity .28s ease, transform .28s ease;
+    }
+    .nav-mobile-panel a:nth-child(1){ transition-delay:.06s; }
+    .nav-mobile-panel a:nth-child(2){ transition-delay:.10s; }
+    .nav-mobile-panel a:nth-child(3){ transition-delay:.14s; }
+    .nav-mobile-panel a:nth-child(4){ transition-delay:.18s; }
+    .nav-mobile-panel a:nth-child(5){ transition-delay:.22s; }
+    .nav-mobile-panel a:nth-child(6){ transition-delay:.26s; }
+    .nav-mobile-panel .nav-cta{ transition-delay:.30s; }
+    .nav-mobile-panel.is-open a,
+    .nav-mobile-panel.is-open .nav-cta{
+      opacity:1; transform:translateY(0);
+    }
+  }
+
+  .scroll-progress{ display:none; height:3px; background:var(--line); }
+  .scroll-progress-bar{ height:100%; width:0%; background:var(--crimson); }
+  @media (max-width:980px){
+    .scroll-progress{ display:block; }
+  }
+
+  /* ===== ARTICLE ===== */
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:14px; font-weight:600; color:var(--muted);
+    margin-bottom:22px;
+  }
+  .back-link:hover{ color:var(--ink); }
+  .article-head h1{
+    font-family:var(--font-display); font-weight:600;
+    font-size:clamp(28px, 4.6vw, 40px); letter-spacing:-.02em;
+    margin:0 0 16px; max-width:760px;
+  }
+  .article-meta{ display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:40px; }
+  .article-cat{
+    background:var(--chip-bg); color:var(--muted); border-radius:999px;
+    padding:5px 12px; font-size:12px; font-weight:600;
+  }
+  .article-date{ font:600 12px var(--font-mono); color:var(--muted); letter-spacing:.02em; }
+
+  .article-layout{ position:relative; }
+
+  .toc{
+    position:fixed; top:96px; width:200px;
+    left:max(var(--pad), calc((100vw - var(--max)) / 2 + var(--pad)));
+  }
+  .toc-label{
+    font-size:12px; font-weight:600; text-transform:uppercase;
+    letter-spacing:.08em; color:var(--muted); margin-bottom:14px;
+  }
+  .toc-list{ display:flex; flex-direction:column; border-left:2px solid var(--line); }
+  .toc-list a{
+    display:block; padding:7px 0 7px 16px; margin-left:-2px;
+    font-size:13.5px; line-height:1.4; color:var(--muted);
+    border-left:2px solid transparent;
+    transition:color .2s ease, border-color .2s ease;
+  }
+  .toc-list a:hover{ color:var(--ink); }
+  .toc-list a.is-active{ color:var(--crimson); border-left-color:var(--crimson); font-weight:600; }
+
+  .article-body{ margin-left:256px; padding-bottom:80px; }
+  .article-body h2{
+    font-family:var(--font-display); font-weight:600; font-size:22px;
+    letter-spacing:-.01em; color:var(--ink); margin:40px 0 14px;
+    scroll-margin-top:96px;
+  }
+  .article-body h2:first-child{ margin-top:0; }
+  .article-body p{ font-size:16.5px; line-height:1.75; color:var(--subtle); margin:0 0 20px; max-width:78ch; }
+  .article-body ul{ margin:0 0 20px; padding-left:22px; max-width:78ch; }
+  .article-body li{ font-size:16.5px; line-height:1.75; color:var(--subtle); margin-bottom:8px; }
+  .article-body strong{ color:var(--ink); font-weight:700; }
+  .article-body code{
+    background:var(--chip-bg); color:var(--subtle); padding:2px 6px;
+    border-radius:6px; font:600 14px var(--font-mono);
+  }
+
+  @media (max-width:980px){
+    .toc{ position:static; left:auto; top:auto; width:auto; }
+    .toc-label, .toc-list{ display:none; }
+    .article-body{ margin-left:0; }
+  }
+
+  /* ===== FOOTER ===== */
+  .footer{ background:var(--footer-ink); color:var(--footer-text); margin-top:24px; }
+  .footer-inner{ max-width:var(--max); margin:0 auto; padding:52px var(--pad) 40px; }
+  .footer-top{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:32px; }
+  .footer-brand{ max-width:300px; }
+  .footer-brand .name{ font-family:var(--font-display); font-weight:700; font-size:23px; }
+  .footer-brand .tag{ color:var(--footer-muted); font-size:14px; margin-top:9px; line-height:1.5; }
+  .social-row{ display:flex; gap:9px; margin-top:18px; }
+  .social-btn{
+    width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,.08);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:600; color:var(--footer-link);
+  }
+  .footer-cols{ display:flex; gap:56px; flex-wrap:wrap; }
+  .footer-col-label{
+    font-size:12px; font-weight:600; color:var(--footer-muted);
+    text-transform:uppercase; letter-spacing:.08em; margin-bottom:13px;
+  }
+  .footer-col-links{ display:flex; flex-direction:column; gap:10px; font-size:14px; color:var(--footer-link); }
+  .footer-rule{
+    border-top:1px solid rgba(255,255,255,.1); margin-top:32px; padding-top:18px;
+    font-size:13px; color:var(--footer-rule);
+  }
+
+  @media (max-width:520px){
+    .footer-cols{ gap:32px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ===== NAV ===== -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html#top" style="text-decoration:none;">Kelvin Weng<span class="dot">.</span></a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#photography">Photography</a>
+      <a href="../projects.html">Projects</a>
+      <a href="../blog.html" class="is-active">Blog</a>
+      <a href="../files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
+    </nav>
+
+    <button class="nav-cta" type="button">Get in touch</button>
+
+    <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navMobilePanel" aria-label="Toggle menu">
+      <span></span>
+    </button>
+  </div>
+
+  <nav class="nav-mobile-panel" id="navMobilePanel" aria-label="Mobile">
+    <div class="nav-mobile-inner">
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#photography">Photography</a>
+      <a href="../projects.html">Projects</a>
+      <a href="../blog.html" class="is-active">Blog</a>
+      <a href="../files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
+      <button class="nav-cta" type="button">Get in touch</button>
+    </div>
+  </nav>
+
+  <div class="scroll-progress" aria-hidden="true">
+    <div class="scroll-progress-bar" id="scrollProgressBar"></div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ===== ARTICLE ===== -->
+  <section id="article-top">
+    <div class="container">
+
+      <div class="article-layout">
+
+        <nav class="toc" aria-label="Article sections">
+          <a href="../blog.html" class="back-link">← Back to Blog</a>
+          <div class="toc-label">On this page</div>
+          <div class="toc-list">
+            <a href="#starting-point">Starting point</a>
+            <a href="#picking-a-design">Picking a design</a>
+            <a href="#getting-the-order-right">Getting the order right</a>
+            <a href="#mobile">Making it work on mobile</a>
+            <a href="#hero-personality">Giving the hero personality</a>
+            <a href="#chasing-bugs">Chasing down the bugs</a>
+            <a href="#polish-details">Small polish details</a>
+            <a href="#real-photos">Getting ready for real photos</a>
+            <a href="#hosting">Hosting it</a>
+            <a href="#whats-next">What's next</a>
+          </div>
+        </nav>
+
+        <div class="article-body">
+
+        <div class="article-head">
+          <h1>How I Built and Hosted This Site</h1>
+        </div>
+        <div class="article-meta">
+          <span class="article-cat">Behind the Scenes</span>
+          <span class="article-date">02 Jul 2026 · 8 min read</span>
+        </div>
+
+        <p>I built this site with Claude, working through it section by section over a series of chats rather than writing every line myself. I want to be upfront about that, partly because it's honest, and partly because if you're planning to do something similar, knowing that an AI assistant was doing a lot of the actual code writing changes what "building a site" looks like for you too. You're directing decisions and reviewing output, more than typing every character.</p>
+
+        <p>This isn't a full step by step tutorial. It's the key decisions, the bits where I changed my mind, and (properly, technically) how the site is actually hosted, since that part trips people up more than the design does.</p>
+
+        <h2 id="starting-point">Starting point</h2>
+        <p>I didn't start blank. I already had a coral and cream colour palette, two fonts (Schibsted Grotesk for headings, Hanken Grotesque for body text) and a rough layout from an earlier attempt. I also had a separate draft file with different section content I liked better in places. So the first job wasn't "design a site," it was "merge two things I already had."</p>
+
+        <h2 id="picking-a-design">Picking a design, then borrowing from a second one</h2>
+        <p>The second draft had a hero section, an About section and a work timeline I preferred, but it used a completely different visual style. Rather than adopting that whole look, I kept my existing coral palette and fonts, and just rebuilt the content and structure I liked using that existing style. More effort than copying and pasting, but it meant the finished site stayed visually consistent instead of feeling like two different sites stitched together.</p>
+
+        <h2 id="getting-the-order-right">Getting the order right</h2>
+        <p>My first draft went: intro, work history, photography, about me. The About section, which really introduces who I am, was buried near the bottom. I moved things so it reads: intro, about me, work history, photography, basically telling people who I am before showing them what I've done.</p>
+
+        <h2 id="mobile">Making it work on mobile</h2>
+        <p>This was the part worth taking seriously early rather than late. Two things broke on a narrow screen:</p>
+        <ul>
+          <li>My photo grid and About section used a fixed two column layout that squeezed instead of stacking, which turned my bio into a wall of skinny wrapped text.</li>
+          <li>My navigation bar had no breathing room, with the logo, links and button all crammed together.</li>
+        </ul>
+        <p>The fix was adding proper rules so things stack vertically under a certain screen width, and building an actual mobile menu (a hamburger icon that opens a dropdown) instead of trying to cram every link into one row.</p>
+
+        <h2 id="hero-personality">Giving the hero some personality</h2>
+        <p>I wanted the top of the site to feel alive without being naff. The idea that stuck: an interactive graphic shaped like a camera aperture (a nod to photography) that opens wider the faster your cursor moves, with small drifting particles around it (a nod to the data side of my work). Stop moving, and it settles back down on its own. If there's no cursor at all, like on a phone, it drifts and breathes gently by itself rather than sitting frozen.</p>
+        <p>I built this as a separate standalone piece first, before deciding to scope a smaller version into just the hero as an actual cursor replacement. It only takes over the cursor inside the hero, buttons and links still show a normal clickable pointer, and it switches off entirely for anyone with reduced motion settings enabled or on a touch device.</p>
+
+        <h2 id="chasing-bugs">Chasing down the bugs you can't always see</h2>
+        <p>A few issues only showed up "sometimes," which made them harder to track down properly.</p>
+        <p>One was a faint seam where the hero's background met the section below it, more visible when the cursor effect got close to that edge. Instead of trying to perfectly tune the fade so it always hit zero brightness exactly at the border, I added a dedicated fade layer that blends into the same background colour regardless of what the cursor's doing.</p>
+        <p>Another was my nav bar being a different height on desktop versus mobile. The cause was my collapsed mobile menu quietly still taking up a sliver of space because some CSS rules were accidentally scoped to only apply on narrow screens. Fixing the scope made both versions match, and I trimmed the padding down while I was there.</p>
+        <p>A related one: clicking a nav link would scroll the page, but the section title would land hidden under the sticky top bar. On mobile specifically, the menu was also physically pushing the page content down while open, so closing it at the same time as scrolling threw off exactly where the browser landed. The real fix was making the mobile menu overlay on top of the page instead of pushing it, so opening or closing it never changes anyone's scroll position.</p>
+
+        <h2 id="polish-details">Small polish details</h2>
+        <p>The camera aperture graphic originally looked more like a spinning wheel cut into segments than actual camera blades, since I'd drawn each blade with straight edges. Real aperture blades overlap at an angle, so I rebuilt the shape with a slight twist on each blade's inner edge to mimic that. I'd also used an odd number of blades (seven), which broke an alternating light and dark pattern where it wrapped back to the start. Switching to an even number (eight) fixed that instantly.</p>
+        <p>I also added a subtle flicker to the background particles, like distant stars, using two mismatched timing cycles per dot so they never pulse in sync. I did consider going further, like showing small changing numbers to hammer the data theme, and decided against it since it felt like it'd tip into gimmick territory. Knowing when to stop mattered as much as the additions themselves.</p>
+
+        <h2 id="real-photos">Getting ready for real photos</h2>
+        <p>The photography section and About portrait are still placeholders. Before adding real images, I set up a simple folder structure: an <code>images</code> folder sitting next to the main site file, with predictable filenames matching each photo slot. That way, swapping in real photos later is just exporting them with the right name and dropping them in, no code changes needed.</p>
+
+        <h2 id="hosting">Hosting it: GitHub Pages and Cloudflare Registrar</h2>
+        <p>This is the part worth being precise about, since it's easy to get stuck on DNS.</p>
+        <p><strong>The domain.</strong> I registered my domain through Cloudflare Registrar rather than a typical domain seller. Cloudflare sells domains at cost, without the usual markup other registrars add, and since Cloudflare was also going to manage my DNS, it kept everything in one dashboard.</p>
+        <p><strong>Telling GitHub about the domain.</strong> In the repository's Settings, under Pages, there's a "Custom domain" field. Typing your domain in there and saving creates a file called <code>CNAME</code> at the root of your repository, containing just your domain name. That file is what tells GitHub Pages which domain should be allowed to serve your site.</p>
+        <p><strong>Setting up DNS in Cloudflare.</strong> This is the bit that trips people up on other registrars, because a plain domain (like <code>example.com</code>, no <code>www</code>) technically isn't allowed to have a CNAME record pointing somewhere else, only a subdomain like <code>www.example.com</code> can. Most guides tell you to work around this by adding four separate A records pointing at GitHub's server addresses instead. Cloudflare has a feature called CNAME flattening that removes that whole problem: you can add a single CNAME record at the root of your domain (using <code>@</code> as the name) pointing to <code>yourusername.github.io</code>, and Cloudflare resolves it into the right address behind the scenes automatically. I also added a second CNAME record for the <code>www</code> version pointing to the same place, since GitHub recommends configuring both and will redirect one to the other automatically.</p>
+        <p><strong>The proxy setting.</strong> Cloudflare gives every DNS record a toggle, shown as a little cloud icon, between "proxied" (orange) and "DNS only" (grey). I left both records as DNS only to start with. The reason: GitHub needs to directly verify your domain and issue its own free HTTPS certificate through Let's Encrypt, and if Cloudflare's proxy is switched on too early, that verification can fail, or you can end up with a redirect loop later since both GitHub and Cloudflare will try to handle the secure connection. Once GitHub's certificate was properly issued, proxying could be turned on safely, as long as Cloudflare's SSL/TLS mode is set to Full rather than Flexible, otherwise you get stuck in exactly that redirect loop.</p>
+        <p><strong>Turning on HTTPS.</strong> Back in the GitHub Pages settings, there's an "Enforce HTTPS" checkbox that only becomes available once GitHub has confirmed the domain and issued a certificate, which can take anywhere from a few minutes to a few hours after DNS changes go live. Once it's ticked, visitors are automatically redirected to the secure version of the site.</p>
+        <p><strong>No build step.</strong> Since the whole site is one self contained HTML file plus an images folder, there's genuinely nothing to build or compile. GitHub Pages just serves the files exactly as they sit in the repository.</p>
+
+        <h2 id="whats-next">What's next</h2>
+        <p>The photos are still the main gap, and I'm planning to keep developing the site with Claude Code rather than only through chat, since it can work directly with the project files on my computer and handle git commits and pushes, which should make ongoing changes, like this very post, faster to ship.</p>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="name">Kelvin Weng<span style="color:var(--coral-red)">.</span></div>
+        <div class="tag">Business Analyst &amp; photographer. Available for select work.</div>
+        <div class="social-row">
+          <span class="social-btn" aria-hidden="true">in</span>
+          <span class="social-btn" aria-hidden="true">IG</span>
+          <span class="social-btn" aria-hidden="true">✉</span>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <div class="footer-col-links">
+            <span>Work</span><span>Photography</span><span>About</span>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-label">More</div>
+          <div class="footer-col-links">
+            <span>Résumé</span><span>Contact</span><span>Newsletter</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-rule">© 2026 Kelvin Weng — Built with care.</div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var toggle = document.getElementById('navToggle');
+    var panel = document.getElementById('navMobilePanel');
+    toggle.addEventListener('click', function(){
+      var isOpen = panel.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    panel.querySelectorAll('a, button').forEach(function(el){
+      el.addEventListener('click', function(){
+        panel.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  })();
+</script>
+
+<script>
+  // Reading-progress bar under the nav, shown only where the sidebar TOC is
+  // hidden (narrow screens), as a substitute for the section indicator.
+  (function(){
+    var bar = document.getElementById('scrollProgressBar');
+    if (!bar) return;
+
+    function update(){
+      var doc = document.documentElement;
+      var scrollable = doc.scrollHeight - doc.clientHeight;
+      var pct = scrollable > 0 ? (doc.scrollTop / scrollable) * 100 : 0;
+      bar.style.width = pct + '%';
+    }
+
+    var ticking = false;
+    window.addEventListener('scroll', function(){
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function(){
+        update();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener('resize', update);
+
+    update();
+  })();
+</script>
+
+<script>
+  // Highlights the on-this-page link matching whichever heading the reader has
+  // scrolled past most recently. Driven by scroll position rather than
+  // IntersectionObserver thresholds, so the last heading — which has little
+  // content below it — still gets picked once the page is scrolled to the end.
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc-list a'));
+    var headings = Array.prototype.slice.call(document.querySelectorAll('.article-body h2[id]'));
+    if (!links.length || !headings.length) return;
+
+    var linkFor = {};
+    links.forEach(function(link){
+      linkFor[link.getAttribute('href').slice(1)] = link;
+    });
+
+    var OFFSET = 110;
+
+    function setActive(id){
+      links.forEach(function(link){ link.classList.remove('is-active'); });
+      var active = linkFor[id];
+      if (active) active.classList.add('is-active');
+    }
+
+    function updateActive(){
+      var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      if (atBottom){
+        setActive(headings[headings.length - 1].id);
+        return;
+      }
+      var current = headings[0];
+      for (var i = 0; i < headings.length; i++){
+        if (headings[i].getBoundingClientRect().top <= OFFSET){
+          current = headings[i];
+        } else {
+          break;
+        }
+      }
+      setActive(current.id);
+    }
+
+    var ticking = false;
+    window.addEventListener('scroll', function(){
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function(){
+        updateActive();
+        ticking = false;
+      });
+    }, { passive: true });
+
+    updateActive();
+  })();
+</script>
+
+</body>
+</html>

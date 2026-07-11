@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<!--
+  OPEN ITEMS (as of this draft):
+  1. Side projects — resume has none listed; if Kelvin has informal/personal projects,
+     add them into the #work timeline to round it out.
+  2. Bio tone — currently fairly polished/professional, matching the resume voice.
+     Revisit if a more casual/personal tone is wanted.
+  3. Photography — gallery still uses color-gradient placeholders (#photography section).
+     Swap in real photos once available; Instagram link is there as a stopgap.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelvin Weng — Data & Frames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F1E9D8;
+    --paper-card: #FAF5E9;
+    --ink: #2A241B;
+    --ink-soft: #5B5245;
+    --rule: rgba(42,36,27,0.14);
+    --rust: #B04E2A;
+    --pine: #3A5246;
+    --mustard: #C6902E;
+    --max: 1120px;
+    --radius: 3px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Instrument Sans', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background:var(--mustard); color:var(--ink); }
+
+  a{ color:inherit; }
+
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 32px; }
+
+  .mono{
+    font-family:'JetBrains Mono', monospace;
+    letter-spacing:0.02em;
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--rust);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--rust);
+    display:inline-block;
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    line-height:1.05;
+    letter-spacing:-0.01em;
+  }
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(241,233,216,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--rule);
+  }
+  nav.wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+  }
+  .brand{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:20px;
+  }
+  .navlinks{
+    display:flex; gap:28px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+  }
+  .navlinks a{
+    text-decoration:none;
+    color:var(--ink-soft);
+    position:relative;
+    padding-bottom:3px;
+  }
+  .navlinks a:hover{ color:var(--ink); }
+  .navlinks a::after{
+    content:""; position:absolute; left:0; bottom:0;
+    width:0; height:1px; background:var(--rust);
+    transition:width .25s ease;
+  }
+  .navlinks a:hover::after{ width:100%; }
+  .navlinks button{
+    display:none;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:110px 0 90px;
+    border-bottom:1px solid var(--rule);
+    position:relative;
+  }
+  .hero .frame-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:26px;
+  }
+  .hero h1{
+    font-size:clamp(42px, 7vw, 84px);
+    max-width:820px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--rust);
+  }
+  .hero .lede{
+    max-width:520px;
+    margin-top:28px;
+    font-size:18px;
+    color:var(--ink-soft);
+  }
+  .hero .meta-row{
+    margin-top:52px;
+    display:flex;
+    gap:40px;
+    flex-wrap:wrap;
+  }
+  .meta-item .k{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--rust);
+    display:block;
+    margin-bottom:6px;
+  }
+  .meta-item .v{ font-size:15px; color:var(--ink-soft); }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{ padding:90px 0; border-bottom:1px solid var(--rule); }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom:56px; gap:24px; flex-wrap:wrap;
+  }
+  .section-head h2{ font-size:clamp(30px,4vw,44px); }
+  .section-head p{ max-width:340px; color:var(--ink-soft); font-size:14.5px; }
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:64px;
+  }
+  .about-grid .portrait{
+    aspect-ratio:4/5;
+    border-radius:var(--radius);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(176,78,42,0.35), transparent 55%),
+      radial-gradient(circle at 75% 80%, rgba(58,82,70,0.35), transparent 55%),
+      linear-gradient(160deg, #E4D6B8, #C9B48C);
+    position:relative;
+    overflow:hidden;
+  }
+  .about-grid .portrait::after{
+    content:"F00 — SELF, AVAILABLE LIGHT";
+    position:absolute; bottom:16px; left:16px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:0.06em;
+    color:rgba(42,36,27,0.6);
+  }
+  .about-copy p{ margin-bottom:18px; color:var(--ink-soft); font-size:16px; }
+  .about-copy p strong{ color:var(--ink); font-weight:600; }
+  .skills{
+    margin-top:32px; display:flex; flex-wrap:wrap; gap:10px;
+  }
+  .skills span{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    padding:6px 12px;
+    border:1px solid var(--rule);
+    border-radius:20px;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- WORK TIMELINE ---------- */
+  .timeline{ position:relative; }
+  .timeline::before{
+    content:"";
+    position:absolute; left:78px; top:6px; bottom:6px;
+    width:1px; background:var(--rule);
+  }
+  .trow{
+    display:grid;
+    grid-template-columns:78px 1fr;
+    gap:32px;
+    position:relative;
+    padding:32px 0;
+  }
+  .trow:first-child{ padding-top:0; }
+  .frame-num{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--rust);
+    position:relative;
+  }
+  .frame-num::before{
+    content:"";
+    position:absolute; left:74px; top:5px;
+    width:9px; height:9px; border-radius:50%;
+    background:var(--paper);
+    border:2px solid var(--rust);
+  }
+  .tcard{
+    background:var(--paper-card);
+    border:1px solid var(--rule);
+    border-radius:var(--radius);
+    padding:26px 28px;
+  }
+  .tcard .row1{
+    display:flex; justify-content:space-between; align-items:baseline;
+    flex-wrap:wrap; gap:8px; margin-bottom:10px;
+  }
+  .tcard h3{ font-size:22px; font-weight:500; }
+  .tcard .period{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; color:var(--ink-soft);
+  }
+  .tcard .org{
+    font-size:14px; color:var(--rust); margin-bottom:12px; font-weight:600;
+  }
+  .tcard p{ color:var(--ink-soft); font-size:15px; }
+  .tag{
+    display:inline-block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:3px 9px;
+    border-radius:20px;
+    margin-top:14px;
+    margin-right:6px;
+  }
+  .tag.role{ background:rgba(58,82,70,0.14); color:var(--pine); }
+  .tag.project{ background:rgba(198,144,46,0.18); color:#8C6413; }
+
+  /* ---------- PHOTOGRAPHY / CONTACT SHEET ---------- */
+  .contact-sheet{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:2px;
+    background:var(--ink);
+    padding:2px;
+    border-radius:var(--radius);
+  }
+  .frame{
+    aspect-ratio:3/2;
+    position:relative;
+    overflow:hidden;
+    background: var(--g);
+  }
+  .frame .fnum{
+    position:absolute; top:10px; left:10px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; color:rgba(255,255,255,0.85);
+    background:rgba(0,0,0,0.25);
+    padding:2px 7px; border-radius:10px;
+  }
+  .frame .cap{
+    position:absolute; bottom:0; left:0; right:0;
+    padding:10px 12px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px; letter-spacing:0.03em;
+    color:rgba(255,255,255,0.92);
+    background:linear-gradient(transparent, rgba(0,0,0,0.45));
+  }
+  .frame:hover{ filter:brightness(1.08); }
+
+  /* ---------- WRITING ---------- */
+  .posts{ display:flex; flex-direction:column; }
+  .post{
+    display:grid;
+    grid-template-columns:120px 1fr auto;
+    gap:24px;
+    align-items:baseline;
+    padding:22px 0;
+    border-top:1px solid var(--rule);
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .posts .post:last-child{ border-bottom:1px solid var(--rule); }
+  .post .pdate{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; color:var(--ink-soft);
+  }
+  .post h3{ font-size:19px; font-weight:500; transition:color .2s; }
+  .post:hover h3{ color:var(--rust); }
+  .post .excerpt{ font-size:14px; color:var(--ink-soft); margin-top:5px; }
+  .post .arrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px; color:var(--rust);
+    align-self:center;
+  }
+
+  /* ---------- CONTACT ---------- */
+  .contact-grid{
+    display:grid;
+    grid-template-columns:0.9fr 1.1fr;
+    gap:64px;
+  }
+  .contact-copy h2{ font-size:clamp(30px,4vw,44px); margin-bottom:18px; }
+  .contact-copy p{ color:var(--ink-soft); margin-bottom:28px; max-width:400px; }
+  .contact-copy .direct{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+  }
+  .contact-copy .direct a{ color:var(--rust); text-decoration:none; border-bottom:1px solid var(--rust); }
+  .contact-copy .social{ margin-top:22px; display:flex; gap:18px; font-family:'JetBrains Mono', monospace; font-size:13px; }
+  .contact-copy .social a{ text-decoration:none; color:var(--ink-soft); }
+  .contact-copy .social a:hover{ color:var(--ink); }
+
+  form{ display:flex; flex-direction:column; gap:18px; }
+  .field label{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--ink-soft); margin-bottom:8px;
+  }
+  .field input, .field textarea{
+    width:100%;
+    background:var(--paper-card);
+    border:1px solid var(--rule);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    font-family:'Instrument Sans', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .2s;
+  }
+  .field input:focus, .field textarea:focus{ border-color:var(--rust); }
+  .field textarea{ resize:vertical; min-height:110px; }
+  button.submit{
+    align-self:flex-start;
+    margin-top:6px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    padding:13px 26px;
+    border-radius:var(--radius);
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px; letter-spacing:0.04em; text-transform:uppercase;
+    cursor:pointer;
+    transition:background .2s;
+  }
+  button.submit:hover{ background:var(--rust); }
+  .form-note{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; color:var(--pine);
+    margin-top:10px; min-height:16px;
+  }
+
+  footer{
+    padding:36px 0;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; color:var(--ink-soft);
+    flex-wrap:wrap; gap:10px;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:860px){
+    .about-grid, .contact-grid{ grid-template-columns:1fr; }
+    .about-grid .portrait{ order:-1; max-width:320px; }
+    .contact-sheet{ grid-template-columns:repeat(2,1fr); }
+    .trow{ grid-template-columns:50px 1fr; gap:16px; }
+    .timeline::before{ left:44px; }
+    .frame-num::before{ left:40px; }
+    .post{ grid-template-columns:1fr; gap:6px; }
+    .navlinks{ display:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ scroll-behavior:auto !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <div class="brand">Kelvin Weng</div>
+    <div class="navlinks">
+      <a href="#about">About</a>
+      <a href="#work">Work</a>
+      <a href="#photography">Photography</a>
+      <a href="#writing">Writing</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero wrap" id="top" style="border-bottom:1px solid var(--rule); padding-top:110px;">
+  <div class="frame-tag mono">ROLL 01 — EST. SYDNEY — STILL SHOOTING</div>
+  <h1>Data architect.<br>Occasional <em>photographer</em>.<br>Full-time noticer.</h1>
+  <p class="lede">I bring order to enterprise data by day and chase light and honest streets by evening. This is the record of both — the frameworks I've built and the frames I've kept.</p>
+  <div class="meta-row">
+    <div class="meta-item"><span class="k">Based in</span><span class="v">Sydney, Australia</span></div>
+    <div class="meta-item"><span class="k">Currently</span><span class="v">Data Business Analyst / Data Architect, Macquarie Group</span></div>
+    <div class="meta-item"><span class="k">Find me on</span><span class="v"><a href="https://www.instagram.com/wengke.zip/" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.linkedin.com/in/kelvin-weng/" target="_blank" rel="noopener">LinkedIn</a></span></div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap about-grid">
+    <div class="portrait"></div>
+    <div class="about-copy">
+      <div class="eyebrow">About</div>
+      <h2 style="font-size:32px; margin-bottom:20px;">Finding structure in data, and in the frame.</h2>
+      <p>I work in data governance and architecture across financial services, currently at Macquarie Group, where I help translate messy, enterprise-wide data problems into models, standards, and tooling that people can actually use. <strong>I care about the layer underneath the dashboard</strong> — the taxonomy, the metamodel, the rule that makes the number trustworthy in the first place.</p>
+      <p>Before Macquarie, I spent time at Westpac building and testing data quality rules across large financial datasets — the kind of work that rewards patience and a good eye for what's actually going wrong.</p>
+      <p>Photography is the other half of how I pay attention. Where the day job is about defining structure, a camera is about noticing it — light, geometry, a moment that won't repeat. I shoot mostly around Sydney; more of it lives on Instagram while I build out a proper gallery here.</p>
+      <div class="skills">
+        <span>Data Governance</span>
+        <span>Data Modelling</span>
+        <span>Collibra</span>
+        <span>SQL</span>
+        <span>Power BI</span>
+        <span>Sparx Enterprise Architect</span>
+        <span>Risk Management</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Experience</h2>
+      <p>A chronological reel — the roles, in the order they happened.</p>
+    </div>
+    <div class="timeline">
+
+      <div class="trow">
+        <div class="frame-num mono">F04</div>
+        <div class="tcard">
+          <div class="row1"><h3>Data Business Analyst / Data Architect</h3><span class="period mono">Oct 2022 — Present</span></div>
+          <div class="org">Macquarie Group · Corporate Operations Group – Data</div>
+          <p>Leading business analysis on an enterprise-wide transformation to operationalise Macquarie's Data Management Standard through Collibra. Defined the target metamodel and business rules across 22 asset types, mapped enterprise data and risk frameworks in Sparx Enterprise Architect, and chair monthly forums as a central advisor on data governance across Macquarie's eight divisions.</p>
+          <span class="tag role">Full-time role</span>
+        </div>
+      </div>
+
+      <div class="trow">
+        <div class="frame-num mono">F03</div>
+        <div class="tcard">
+          <div class="row1"><h3>Analyst Programmer</h3><span class="period mono">Mar 2021 — Oct 2022</span></div>
+          <div class="org">Westpac Group (via Tata Consultancy Services) · Data Quality Management</div>
+          <p>Built and deployed enterprise data quality rules end-to-end in Informatica Developer and Dataiku, coordinated through Control-M. Delivered Qlik Sense and Power BI dashboards for Business Data Managers and Executive Management, and ran SQL-based testing across large financial datasets to validate data quality solutions.</p>
+          <span class="tag role">Full-time role</span>
+        </div>
+      </div>
+
+      <div class="trow">
+        <div class="frame-num mono">F02</div>
+        <div class="tcard">
+          <div class="row1"><h3>Bachelor of Business (Finance) &amp; Bachelor of Science in IT (Business Information Systems Management)</h3><span class="period mono">— Mar 2021</span></div>
+          <div class="org">University of Technology Sydney</div>
+          <p>Graduated with a double degree spanning finance and business information systems, with a WAM of 77.94. Also completed Microsoft Dynamics 365 Fundamentals (MB-901) and Microsoft Azure Fundamentals (AZ-900) certifications.</p>
+          <span class="tag project">Education</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="photography">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Photography</h2>
+      <p>A placeholder contact sheet for now — <a href="https://www.instagram.com/wengke.zip/" target="_blank" rel="noopener" style="color:var(--rust); border-bottom:1px solid var(--rust); text-decoration:none;">see the real thing on Instagram</a> while I build out a proper gallery here.</p>
+    </div>
+    <div class="contact-sheet">
+      <div class="frame" style="--g: linear-gradient(135deg,#D9C6A0,#8C6B47)"><span class="fnum mono">F01</span><span class="cap mono">Coastal Fog — Cannon Beach</span></div>
+      <div class="frame" style="--g: linear-gradient(135deg,#4A5A4C,#1E2A22)"><span class="fnum mono">F02</span><span class="cap mono">Pine Line — Mt Hood NF</span></div>
+      <div class="frame" style="--g: linear-gradient(135deg,#C97A4A,#5B2E1D)"><span class="fnum mono">F03</span><span class="cap mono">Neon Diner — SE Division</span></div>
+      <div class="frame" style="--g: linear-gradient(135deg,#B9A587,#3A342A)"><span class="fnum mono">F04</span><span class="cap mono">Wheat Field, July</span></div>
+      <div class="frame" style="--g: linear-gradient(135deg,#7A8C93,#25313A)"><span class="fnum mono">F05</span><span class="cap mono">Rain, Burnside Bridge</span></div>
+      <div class="frame" style="--g: linear-gradient(135deg,#D8B24A,#7A4E1D)"><span class="fnum mono">F06</span><span class="cap mono">Harvest Light — Dundee</span></div>
+      <div class="frame" style="--g: linear-gradient(135deg,#9E5B3F,#2E1B12)"><span class="fnum mono">F07</span><span class="cap mono">Portrait, Available Light</span></div>
+      <div class="frame" style="--g: linear-gradient(135deg,#6E7F6A,#212B20)"><span class="fnum mono">F08</span><span class="cap mono">Fern Trail — Forest Park</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="writing">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Writing</h2>
+      <p>Notes on data governance, photography, and whatever's worth writing down.</p>
+    </div>
+    <div class="posts">
+      <div class="post" style="grid-template-columns:1fr; padding:36px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);">
+        <span class="excerpt" style="font-size:15px;">First post coming soon — this section is ready whenever you are.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap contact-grid">
+    <div class="contact-copy">
+      <div class="eyebrow">Get in touch</div>
+      <h2>Say hello.</h2>
+      <p>Happy to talk data governance, architecture, photography, or anything in between. I read everything that comes through here myself.</p>
+      <div class="direct">→ <a href="mailto:kelvin.weng@outlook.com">kelvin.weng@outlook.com</a></div>
+      <div class="social">
+        <a href="https://www.instagram.com/wengke.zip/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.linkedin.com/in/kelvin-weng/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+    <form id="contactForm" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="contact">
+      <p style="display:none;"><label>Don't fill this out if you're human: <input name="bot-field"></label></p>
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" placeholder="Your name" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@email.com" required>
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="What are you working on?" required></textarea>
+      </div>
+      <button class="submit" type="submit">Send message</button>
+      <div class="form-note" id="formNote"></div>
+    </form>
+  </div>
+</section>
+
+<footer class="wrap">
+  <span>© 2026 Kelvin Weng</span>
+  <span>Sydney, Australia · GMT+10</span>
+</footer>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var form = this;
+    var data = new FormData(form);
+    var note = document.getElementById('formNote');
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(data).toString()
+    })
+    .then(function(){
+      note.textContent = 'Message received — I\'ll write back within a couple of days.';
+      form.reset();
+    })
+    .catch(function(){
+      note.textContent = 'Something went wrong — try emailing me directly instead.';
+    });
+  });
+</script>
+
+</body>
+</html>

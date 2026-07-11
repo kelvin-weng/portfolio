@@ -1,0 +1,8 @@
+.DS_Store
+.claude/settings.local.json
+
+# Raw camera originals (unreferenced by site; only images/web/*.jpg is used)
+images/*.JPG
+images/*.jpeg
+images/*.jpg
+!images/web/

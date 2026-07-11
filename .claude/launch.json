@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static-preview",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["-m", "http.server", "4173", "-d", "/Users/kelvin/Desktop/Kelvin Weng Personal Website"],
+      "port": 4173
+    }
+  ]
+}

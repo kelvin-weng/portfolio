@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kelvin Weng — Data Business Analyst &amp; Photographer</title>
+<meta name="description" content="Kelvin Weng — Data Business Analyst / Data Architect at Macquarie Group, and photographer based in Sydney.">
+<meta name="theme-color" content="#FBF8F3">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesque:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --canvas:#FBF8F3;
+    --surface:#fff;
+    --ink:#1B1712;
+    --muted:#6F655B;
+    --subtle:#453D34;
+    --coral-red:#FF7066;
+    --crimson:#EA1723;
+    --line:#EAE3D8;
+    --chip-bg:#F2ECE2;
+    --photo-bg:#EEE6DB;
+    --photo-line:#E4DAC9;
+    --photo-text:#B0A493;
+    --footer-ink:#1B1712;
+    --footer-text:#F3EDE4;
+    --footer-muted:#9C9084;
+    --footer-link:#D6CDBF;
+    --footer-rule:#8A7C6F;
+    --font-display:'Schibsted Grotesk',sans-serif;
+    --font-body:'Hanken Grotesque',system-ui,sans-serif;
+    --font-mono:ui-monospace,'SF Mono',Menlo,monospace;
+    --max:1120px;
+    --pad:32px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{
+    scroll-behavior:smooth;
+    /* keeps anchor-jumped sections from landing underneath the sticky nav */
+    scroll-padding-top:88px;
+  }
+
+  body{
+    margin:0;
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{ background:var(--coral-red); color:#fff; }
+  a{ text-decoration:none; }
+  img{ max-width:100%; display:block; }
+
+  /* skip link */
+  .skip-link{
+    position:absolute; left:-9999px; top:0;
+    background:var(--ink); color:#fff; padding:12px 20px;
+    border-radius:0 0 8px 0; z-index:100; font-size:14px;
+  }
+  .skip-link:focus{ left:0; }
+
+  .container{ max-width:var(--max); margin:0 auto; padding:0 var(--pad); }
+
+  /* ===== NAV ===== */
+  .nav{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:blur(10px);
+    background:rgba(251,248,243,.92);
+    border-bottom:1px solid #EEE7DC;
+  }
+  .nav-inner{
+    max-width:var(--max); margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px var(--pad);
+    gap:16px;
+  }
+  .brand{
+    font-family:var(--font-display); font-weight:700; font-size:23px;
+    letter-spacing:-.02em; color:var(--ink); flex-shrink:0;
+  }
+  .brand .dot{ color:var(--coral-red); }
+  .nav-links{
+    display:flex; align-items:center; gap:28px;
+    font-size:15px; font-weight:500; color:var(--muted);
+  }
+  .nav-links a{ color:inherit; }
+  .nav-links a:hover{ color:var(--ink); }
+  .nav-cta{
+    background:var(--ink); color:#fff; border:none; border-radius:999px;
+    padding:10px 20px; font:600 14px/1 var(--font-body); cursor:pointer;
+    flex-shrink:0; white-space:nowrap;
+  }
+  .nav-toggle{
+    display:none;
+    background:none; border:1px solid var(--line); border-radius:9px;
+    width:34px; height:34px; padding:0; cursor:pointer;
+    align-items:center; justify-content:center; flex-shrink:0;
+    transition:border-color .2s ease;
+  }
+  .nav-toggle:hover{ border-color:#D8CBB8; }
+  .nav-toggle span,
+  .nav-toggle::before,
+  .nav-toggle::after{
+    content:""; display:block; width:16px; height:2px;
+    background:var(--ink); position:relative;
+    transition:transform .32s cubic-bezier(.34,1.56,.64,1), opacity .18s ease;
+  }
+  .nav-toggle::before{ position:absolute; transform:translateY(-5px); }
+  .nav-toggle::after{ position:absolute; transform:translateY(5px); }
+  .nav-toggle[aria-expanded="true"] span{ opacity:0; transform:scaleX(0); }
+  .nav-toggle[aria-expanded="true"]::before{ transform:translateY(0) rotate(45deg); }
+  .nav-toggle[aria-expanded="true"]::after{ transform:translateY(0) rotate(-45deg); }
+
+  .nav-mobile-inner{
+    overflow:hidden; min-height:0;
+  }
+
+  .nav-mobile-panel{
+    display:grid;
+    grid-template-rows:0fr;
+    opacity:0;
+    transition:grid-template-rows .38s cubic-bezier(.34,1.56,.64,1), opacity .28s ease;
+  }
+  .nav-mobile-panel.is-open{
+    grid-template-rows:1fr;
+    opacity:1;
+  }
+
+  @media (max-width:820px){
+    .nav-links{ display:none; }
+    .nav-cta{ display:none; }
+    .nav-toggle{ display:flex; }
+
+    .nav-mobile-panel{
+      position:absolute; top:100%; left:0; right:0; z-index:15;
+      border-top:1px solid #EEE7DC;
+      background:var(--canvas);
+      box-shadow:0 16px 24px -18px rgba(27,23,18,.18);
+      max-height:calc(100vh - 100%);
+      overflow-y:auto;
+    }
+    .nav-mobile-inner{
+      padding:0 var(--pad);
+      display:flex; flex-direction:column;
+    }
+    .nav-mobile-panel a:first-child{ margin-top:10px; }
+    .nav-mobile-panel a{
+      color:var(--ink); font-size:16px; font-weight:500;
+      padding:14px 0; border-bottom:1px solid var(--line);
+      opacity:0; transform:translateY(-6px);
+      transition:opacity .28s ease, transform .28s ease;
+    }
+    .nav-mobile-panel a:last-of-type{ border-bottom:none; }
+    .nav-mobile-panel .nav-cta{
+      display:block; width:100%; text-align:center; margin-top:14px; margin-bottom:18px;
+      opacity:0; transform:translateY(-6px);
+      transition:opacity .28s ease, transform .28s ease;
+    }
+    /* staggered cascade as the panel opens */
+    .nav-mobile-panel a:nth-child(1){ transition-delay:.06s; }
+    .nav-mobile-panel a:nth-child(2){ transition-delay:.10s; }
+    .nav-mobile-panel a:nth-child(3){ transition-delay:.14s; }
+    .nav-mobile-panel a:nth-child(4){ transition-delay:.18s; }
+    .nav-mobile-panel a:nth-child(5){ transition-delay:.22s; }
+    .nav-mobile-panel a:nth-child(6){ transition-delay:.26s; }
+    .nav-mobile-panel .nav-cta{ transition-delay:.30s; }
+    .nav-mobile-panel.is-open a,
+    .nav-mobile-panel.is-open .nav-cta{
+      opacity:1; transform:translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .nav-toggle span, .nav-toggle::before, .nav-toggle::after,
+    .nav-mobile-panel, .nav-mobile-panel a, .nav-mobile-panel .nav-cta{
+      transition:none !important;
+    }
+  }
+
+  /* ===== HERO ===== */
+  .hero{ position:relative; overflow:hidden; }
+  .hero-wash{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(600px 380px at 10% 0%, rgba(233,121,91,.28), transparent 60%),
+      radial-gradient(560px 400px at 95% 8%, rgba(124,147,232,.20), transparent 60%),
+      radial-gradient(620px 460px at 55% 130%, rgba(240,180,140,.26), transparent 55%);
+  }
+  .hero-cursor-canvas{
+    position:absolute; inset:0; width:100%; height:100%;
+    pointer-events:none;
+  }
+  /* Fades the very bottom of the hero into the page background so the wash
+     and the cursor canvas never show a hard edge/seam at the boundary. */
+  .hero-fade{
+    position:absolute; left:0; right:0; bottom:0; height:180px;
+    background:linear-gradient(to bottom, rgba(251,248,243,0), var(--canvas));
+    pointer-events:none;
+  }
+  @media (max-width:640px){
+    .hero-fade{ height:110px; }
+  }
+  /* Applied via JS only when a fine pointer is present and motion isn't reduced,
+     so touch devices and reduced-motion users keep the normal cursor. */
+  .hero.has-cursor-fx{ cursor:none; }
+  .hero.has-cursor-fx a,
+  .hero.has-cursor-fx button{ cursor:pointer; }
+  .hero-inner{ position:relative; padding-top:96px; padding-bottom:84px; }
+  @media (max-width:640px){
+    .hero-inner{ padding-top:64px; padding-bottom:56px; }
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font:600 12px/1 var(--font-mono); letter-spacing:.14em;
+    text-transform:uppercase; color:var(--crimson); margin-bottom:22px;
+  }
+  .eyebrow-dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--coral-red); display:inline-block; flex-shrink:0;
+  }
+  .hero h1{
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(36px, 6vw, 64px);
+    line-height:1.05; letter-spacing:-.03em; margin:0; max-width:820px;
+  }
+  .hero h1 em{ font-style:normal; color:var(--crimson); }
+  .hero-lede{
+    font-size:clamp(17px, 2.4vw, 20px); line-height:1.55; color:var(--muted);
+    max-width:600px; margin:26px 0 0;
+  }
+  .hero-cta{ display:flex; flex-wrap:wrap; gap:13px; margin-top:34px; }
+  .btn{
+    display:inline-block; border-radius:999px; font:600 16px/1 var(--font-body);
+    text-decoration:none; cursor:pointer; border:1px solid transparent;
+  }
+  .btn-primary{ background:var(--ink); color:#fff; padding:15px 28px; }
+  .btn-secondary{ background:#fff; color:var(--ink); border-color:#E0D7C9; padding:14px 27px; }
+  .hero-meta{
+    display:flex; flex-wrap:wrap; gap:32px 44px; margin-top:56px;
+  }
+  .meta-k{
+    font:600 11px var(--font-mono); text-transform:uppercase;
+    letter-spacing:.1em; color:var(--crimson); margin-bottom:6px;
+  }
+  .meta-v{ font-size:15px; color:var(--muted); }
+  .meta-v a{ color:var(--crimson); }
+
+  /* ===== SECTION SPACING ===== */
+  section{ padding:44px 0 16px; }
+  /* Hero already ends with its own bottom padding + fade, so About starts
+     right where that leaves off — no additional top gap stacked on. */
+  #about{ padding-top:0; }
+
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:16px; flex-wrap:wrap; margin-bottom:28px;
+  }
+  .section-head h2{
+    font-family:var(--font-display); font-weight:600;
+    font-size:clamp(26px, 4vw, 34px); letter-spacing:-.02em; margin:0;
+  }
+  .section-head p{ font-size:16px; color:var(--muted); margin:8px 0 0; }
+  .section-head .link{
+    color:var(--crimson); font-weight:600; font-size:15px; white-space:nowrap;
+  }
+
+  /* ===== ABOUT ===== */
+  .about-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:40px; display:grid; grid-template-columns:200px 1fr;
+    gap:36px; align-items:start;
+  }
+  .about-portrait{
+    aspect-ratio:1/1; border-radius:16px;
+    background-color:#F3ECE2;
+    background-image:repeating-linear-gradient(45deg,#EAE1D3 0 10px,transparent 10px 20px);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--photo-text); font:600 10.5px var(--font-mono); letter-spacing:.06em;
+    text-align:center;
+  }
+  .about-card h2{
+    font-family:var(--font-display); font-weight:600; font-size:30px;
+    letter-spacing:-.02em; margin:0 0 14px;
+  }
+  .about-card p{
+    font-size:17px; line-height:1.65; color:var(--subtle); margin:0 0 14px; max-width:640px;
+  }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 24px; }
+  .chip{
+    background:var(--chip-bg); color:var(--muted); border-radius:999px;
+    padding:7px 14px; font-size:13px; font-weight:600;
+  }
+  .btn-accent{
+    background:var(--coral-red); color:#fff; border-radius:999px; padding:13px 24px;
+    font:700 15px/1 var(--font-body); display:inline-block;
+  }
+
+  @media (max-width:640px){
+    .about-card{ grid-template-columns:1fr; padding:28px; }
+    .about-portrait{ max-width:180px; margin:0 auto; }
+  }
+
+  /* ===== EXPERIENCE ===== */
+  .timeline{ display:flex; flex-direction:column; gap:18px; }
+  .titem{
+    display:grid; grid-template-columns:56px 1fr; gap:14px; align-items:stretch;
+  }
+  .ttime{
+    position:relative; display:flex; justify-content:flex-end; align-items:flex-start;
+    gap:8px; padding-top:34px;
+  }
+  .ttime::before{
+    content:''; position:absolute; left:51px; top:38px; bottom:-56px; width:2px;
+    background:var(--line);
+  }
+  .titem:last-child .ttime::before{ display:none; }
+  .tyear{
+    font:600 13px var(--font-mono); color:var(--muted); letter-spacing:.02em;
+    white-space:nowrap;
+  }
+  .tdot{
+    width:8px; height:8px; border-radius:50%; background:var(--coral-red);
+    flex-shrink:0; position:relative; z-index:1;
+  }
+  .tcard{
+    background:var(--surface); border:1px solid var(--line); border-radius:18px;
+    padding:28px 30px;
+  }
+  .trow1{
+    display:flex; flex-wrap:wrap; align-items:baseline;
+    justify-content:space-between; gap:10px; margin-bottom:5px;
+  }
+  .trow1 h3{
+    font-family:var(--font-display); font-weight:600; font-size:20px;
+    letter-spacing:-.01em; margin:0;
+  }
+  .tperiod{
+    font:600 12px var(--font-mono); color:var(--muted);
+    letter-spacing:.02em; white-space:nowrap;
+  }
+  .torg{ font-size:14px; color:var(--crimson); font-weight:600; margin-bottom:12px; }
+  .tcard p{ font-size:15px; line-height:1.6; color:var(--muted); margin:0 0 14px; }
+  .ttag{
+    background:var(--chip-bg); color:var(--muted); border-radius:999px;
+    padding:5px 12px; font-size:12px; font-weight:600; display:inline-block;
+  }
+
+  @media (max-width:640px){
+    .titem{ grid-template-columns:1fr; }
+    .tcard{ padding:22px; }
+    .ttime{ display:none; }
+  }
+
+  /* ===== PHOTOGRAPHY ===== */
+  .photo-tape{
+    position:relative; overflow:hidden; margin-top:36px;
+    -webkit-mask-image:linear-gradient(to right, transparent 0, #000 100px, #000 calc(100% - 100px), transparent 100%);
+    mask-image:linear-gradient(to right, transparent 0, #000 100px, #000 calc(100% - 100px), transparent 100%);
+  }
+  .photo-tape-track{
+    display:flex; width:max-content; gap:18px;
+    animation:tape-scroll 42s linear infinite;
+  }
+  .photo-tape:hover .photo-tape-track{ animation-play-state:paused; }
+  .ptape-item{
+    flex:0 0 auto; width:260px; aspect-ratio:4/3; border-radius:16px;
+    object-fit:cover; background:var(--photo-bg);
+  }
+  @keyframes tape-scroll{
+    from{ transform:translateX(0); }
+    to{ transform:translateX(-50%); }
+  }
+
+  @media (max-width:640px){
+    .ptape-item{ width:180px; }
+    .photo-tape{
+      -webkit-mask-image:linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+      mask-image:linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+    }
+  }
+
+  /* ===== FOOTER ===== */
+  .footer{ background:var(--footer-ink); color:var(--footer-text); margin-top:24px; }
+  .footer-inner{ max-width:var(--max); margin:0 auto; padding:52px var(--pad) 40px; }
+  .footer-top{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:32px; }
+  .footer-brand{ max-width:300px; }
+  .footer-brand .name{ font-family:var(--font-display); font-weight:700; font-size:23px; }
+  .footer-brand .tag{ color:var(--footer-muted); font-size:14px; margin-top:9px; line-height:1.5; }
+  .social-row{ display:flex; gap:9px; margin-top:18px; }
+  .social-btn{
+    width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,.08);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:600; color:var(--footer-link);
+  }
+  .footer-cols{ display:flex; gap:56px; flex-wrap:wrap; }
+  .footer-col-label{
+    font-size:12px; font-weight:600; color:var(--footer-muted);
+    text-transform:uppercase; letter-spacing:.08em; margin-bottom:13px;
+  }
+  .footer-col-links{ display:flex; flex-direction:column; gap:10px; font-size:14px; color:var(--footer-link); }
+  .footer-rule{
+    border-top:1px solid rgba(255,255,255,.1); margin-top:32px; padding-top:18px;
+    font-size:13px; color:var(--footer-rule);
+  }
+
+  @media (max-width:520px){
+    .footer-cols{ gap:32px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ===== NAV ===== -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" style="text-decoration:none;">Kelvin Weng<span class="dot">.</span></a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#work">Work</a>
+      <a href="#photography">Photography</a>
+      <a href="projects.html">Projects</a>
+      <a href="blog.html">Blog</a>
+      <a href="files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
+    </nav>
+
+    <button class="nav-cta" type="button">Get in touch</button>
+
+    <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navMobilePanel" aria-label="Toggle menu">
+      <span></span>
+    </button>
+  </div>
+
+  <nav class="nav-mobile-panel" id="navMobilePanel" aria-label="Mobile">
+    <div class="nav-mobile-inner">
+      <a href="#about">About</a>
+      <a href="#work">Work</a>
+      <a href="#photography">Photography</a>
+      <a href="projects.html">Projects</a>
+      <a href="blog.html">Blog</a>
+      <a href="files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
+      <button class="nav-cta" type="button">Get in touch</button>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- ===== HERO ===== -->
+  <div class="hero" id="top">
+    <div class="hero-wash" aria-hidden="true"></div>
+    <canvas class="hero-cursor-canvas" id="heroCursorCanvas" aria-hidden="true"></canvas>
+    <div class="hero-fade" aria-hidden="true"></div>
+    <div class="container hero-inner">
+
+      <div class="eyebrow"><span class="eyebrow-dot"></span>Sydney, Australia · Still Shooting</div>
+
+      <h1>Data architect. Occasional <em>photographer</em>. Full-time noticer.</h1>
+
+      <p class="hero-lede">I bring order to enterprise data by day and chase light and honest streets by evening. This is where both live — the frameworks I've built, and the frames I've kept.</p>
+
+      <div class="hero-cta">
+        <a href="#work" class="btn btn-primary">View my work</a>
+        <a href="#photography" class="btn btn-secondary">See photography</a>
+      </div>
+
+      <div class="hero-meta">
+        <div>
+          <div class="meta-k">Based in</div>
+          <div class="meta-v">Sydney, Australia</div>
+        </div>
+        <div>
+          <div class="meta-k">Currently</div>
+          <div class="meta-v">Data Business Analyst, Macquarie Group</div>
+        </div>
+        <div>
+          <div class="meta-k">Find me on</div>
+          <div class="meta-v"><a href="https://www.instagram.com/wengke.zip/" target="_blank" rel="noopener noreferrer">Instagram</a> · <a href="https://www.linkedin.com/in/kelvin-weng/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== ABOUT ===== -->
+  <section id="about">
+    <div class="container">
+      <div class="about-card">
+        <div class="about-portrait" role="img" aria-label="Portrait placeholder">PORTRAIT</div>
+        <div>
+          <h2>About me</h2>
+          <p>I work in data governance and architecture across financial services, currently at Macquarie Group, where I help translate messy, enterprise-wide data problems into models, standards, and tooling that people can actually use. I care about the layer underneath the dashboard — the taxonomy, the metamodel, the rule that makes the number trustworthy in the first place.</p>
+          <p>Photography is the other half of how I pay attention. Where the day job is about defining structure, a camera is about noticing it — light, geometry, a moment that won't repeat. I shoot mostly around Sydney, and more of it lives on Instagram while I build out a proper gallery here.</p>
+          <div class="chip-row">
+            <span class="chip">Data Governance</span>
+            <span class="chip">Data Modelling</span>
+            <span class="chip">Collibra</span>
+            <span class="chip">SQL</span>
+            <span class="chip">Power BI</span>
+            <span class="chip">Sparx Enterprise Architect</span>
+            <span class="chip">Photography</span>
+          </div>
+          <a href="files/Kelvin-Weng-Resume.pdf" download class="btn-accent">Download résumé</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EXPERIENCE (timeline) ===== -->
+  <section id="work">
+    <div class="container">
+      <div class="section-head">
+        <h2>Experience</h2>
+      </div>
+
+      <div class="timeline">
+
+        <div class="titem">
+          <div class="ttime">
+            <span class="tyear">2025</span>
+            <span class="tdot"></span>
+          </div>
+          <article class="tcard">
+            <div class="trow1">
+              <h3>Data Business Analyst</h3>
+              <span class="tperiod">Sep 2025 — Present</span>
+            </div>
+            <div class="torg">Macquarie Group · Macquarie Capital - Project Delivery</div>
+            <p>In this role, I bridge the gap between finance workflows and engineering solutions. I partner with FP&amp;A and Financial Operations teams to dismantle clunky, manual spreadsheet processes and replace them with robust, automated data products. A major highlight has been architecting the onboarding of our core Salesforce CRM schema, building a foundation that securely scales over 2 million rows of critical deal pipeline data every single day.</p>
+            <span class="ttag">Full-time role</span>
+          </article>
+        </div>
+
+        <div class="titem">
+          <div class="ttime">
+            <span class="tyear">2022</span>
+            <span class="tdot"></span>
+          </div>
+          <article class="tcard">
+            <div class="trow1">
+              <h3>Data Solution Designer</h3>
+              <span class="tperiod">Oct 2022 — Aug 2025</span>
+            </div>
+            <div class="torg">Macquarie Group · Corporate Operations Group – Data</div>
+            <p>Here, my focus was on enterprise-wide transformation and data governance at scale. I acted as a central advisor across eight business divisions to operationalize Macquarie's new Data Management Standard using Collibra. By translating complex regulatory obligations into clean semantic data models, I helped design the blueprints that allowed the development teams to launch initial releases smoothly.</p>
+            <span class="ttag">Full-time role</span>
+          </article>
+        </div>
+
+        <div class="titem">
+          <div class="ttime">
+            <span class="tyear">2021</span>
+            <span class="tdot"></span>
+          </div>
+          <article class="tcard">
+            <div class="trow1">
+              <h3>Analyst Programmer</h3>
+              <span class="tperiod">Mar 2021 — Oct 2022</span>
+            </div>
+            <div class="torg">Westpac Group (via Tata Consultancy Services) · Data Quality Management</div>
+            <p>This role was all about ensuring trust and reliability in large-scale financial datasets. I built and deployed end-to-end data quality rules using tools like Dataiku and Informatica, while creating dynamic Qlik Sense and Power BI dashboards for executive leadership. It was a great blend of deep SQL testing, process orchestration, and building data-driven tools that executive management could actually rely on.</p>
+            <span class="ttag">Full-time role</span>
+          </article>
+        </div>
+
+        <div class="titem">
+          <div class="ttime">
+            <span class="tyear">2017</span>
+            <span class="tdot"></span>
+          </div>
+          <article class="tcard">
+            <div class="trow1">
+              <h3>Bachelor of Business (Finance) &amp; Bachelor of Science in IT (Business Information Systems Management)</h3>
+              <span class="tperiod">2017 - 2020</span>
+            </div>
+            <div class="torg">University of Technology Sydney</div>
+            <p>Graduated with a double degree spanning finance and business information systems, with a WAM of 77.94. Also completed Microsoft Dynamics 365 Fundamentals (MB-901) and Microsoft Azure Fundamentals (AZ-900) certifications.</p>
+            <span class="ttag">Education</span>
+          </article>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PHOTOGRAPHY ===== -->
+  <section id="photography">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Photography</h2>
+          <p>A selection of frames from wherever the light's good.</p>
+        </div>
+        <a href="#" class="link">Full gallery →</a>
+      </div>
+    </div>
+
+    <div class="photo-tape" aria-hidden="true">
+      <div class="photo-tape-track">
+        <div class="ptape-item">PHOTO 01</div>
+        <div class="ptape-item">PHOTO 02</div>
+        <div class="ptape-item">PHOTO 03</div>
+        <div class="ptape-item">PHOTO 04</div>
+        <div class="ptape-item">PHOTO 05</div>
+        <div class="ptape-item">PHOTO 06</div>
+        <div class="ptape-item">PHOTO 07</div>
+        <div class="ptape-item">PHOTO 08</div>
+        <div class="ptape-item">PHOTO 09</div>
+        <div class="ptape-item">PHOTO 10</div>
+        <div class="ptape-item">PHOTO 01</div>
+        <div class="ptape-item">PHOTO 02</div>
+        <div class="ptape-item">PHOTO 03</div>
+        <div class="ptape-item">PHOTO 04</div>
+        <div class="ptape-item">PHOTO 05</div>
+        <div class="ptape-item">PHOTO 06</div>
+        <div class="ptape-item">PHOTO 07</div>
+        <div class="ptape-item">PHOTO 08</div>
+        <div class="ptape-item">PHOTO 09</div>
+        <div class="ptape-item">PHOTO 10</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="name">Kelvin Weng<span style="color:var(--coral-red)">.</span></div>
+        <div class="tag">Business Analyst &amp; photographer. Available for select work.</div>
+        <div class="social-row">
+          <span class="social-btn" aria-hidden="true">in</span>
+          <span class="social-btn" aria-hidden="true">IG</span>
+          <span class="social-btn" aria-hidden="true">✉</span>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div>
+          <div class="footer-col-label">Explore</div>
+          <div class="footer-col-links">
+            <span>Work</span><span>Photography</span><span>About</span>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-label">More</div>
+          <div class="footer-col-links">
+            <span>Résumé</span><span>Contact</span><span>Newsletter</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-rule">© 2026 Kelvin Weng — Built with care.</div>
+  </div>
+</footer>
+
+<script>
+  (function(){
+    var toggle = document.getElementById('navToggle');
+    var panel = document.getElementById('navMobilePanel');
+    toggle.addEventListener('click', function(){
+      var isOpen = panel.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    panel.querySelectorAll('a, button').forEach(function(el){
+      el.addEventListener('click', function(){
+        panel.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  })();
+</script>
+
+<script>
+  // Aperture cursor — scoped to the hero only, and only for people with a real
+  // mouse. Touch devices and prefers-reduced-motion keep the plain static wash.
+  (function(){
+    "use strict";
+
+    var fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!fine || reduced) return;
+
+    var hero   = document.getElementById('top');
+    var canvas = document.getElementById('heroCursorCanvas');
+    if (!hero || !canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    hero.classList.add('has-cursor-fx');
+
+    var PALETTE = ['#E9795B', '#EA1723', '#7C93E8', '#F0B48C', '#6F655B'];
+
+    var W = 0, H = 0, DPR = Math.max(1, window.devicePixelRatio || 1);
+    function resize(){
+      var r = hero.getBoundingClientRect();
+      W = r.width; H = r.height;
+      canvas.width  = W * DPR;
+      canvas.height = H * DPR;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    var pointer = { x: W/2, y: H/2, active: false, lastMove: 0 };
+    hero.addEventListener('pointermove', function(e){
+      var r = hero.getBoundingClientRect();
+      pointer.x = e.clientX - r.left;
+      pointer.y = e.clientY - r.top;
+      pointer.active = true;
+      pointer.lastMove = performance.now();
+    });
+    hero.addEventListener('pointerleave', function(){
+      pointer.active = false;
+    });
+
+    function idleTarget(t){
+      var cx = W * 0.5, cy = H * 0.55;
+      var rx = Math.min(W, H) * 0.30;
+      var ry = Math.min(W, H) * 0.22;
+      return {
+        x: cx + Math.sin(t * 0.12) * rx + Math.sin(t * 0.064) * rx * 0.25,
+        y: cy + Math.cos(t * 0.096) * ry + Math.cos(t * 0.037) * ry * 0.3
+      };
+    }
+
+    var core = { x: W/2, y: H/2, vx: 0, vy: 0 };
+    // Tracking stays snappy; once idle, the aperture eases back to its
+    // drifting position at ~1/3 the speed instead of snapping over.
+    var SPRING_TRACK = 0.06, SPRING_IDLE = 0.02, DAMP = 0.8;
+    var lastPos = { x: W/2, y: H/2 };
+    var speed = 0;
+
+    var N_PARTICLES = 34;
+    var particles = [];
+    function seedParticles(){
+      particles = [];
+      for (var i = 0; i < N_PARTICLES; i++){
+        particles.push({
+          bx: Math.random() * W,
+          by: Math.random() * H,
+          x: 0, y: 0,
+          r: 1.3 + Math.pow(Math.random(), 1.6) * 4.5,
+          phase: Math.random() * Math.PI * 2,
+          freq: 0.15 + Math.random() * 0.35,
+          amp: 5 + Math.random() * 12,
+          color: PALETTE[(Math.random() * PALETTE.length) | 0],
+          alpha: 0.15 + Math.random() * 0.3,
+          // each dot flickers on its own clock so they never pulse in unison —
+          // two mismatched frequencies beating together read as an irregular
+          // twinkle rather than a mechanical pulse
+          flickerFreq: 0.35 + Math.random() * 1.0,
+          flickerPhase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    seedParticles();
+    window.addEventListener('resize', seedParticles);
+
+    var apertureAngle = 0, holeRadius = 0;
+    var t0 = performance.now();
+
+    function frame(now){
+      var t = (now - t0) / 1000;
+      var tracking = pointer.active && (now - pointer.lastMove) < 1500;
+      var target = tracking ? { x: pointer.x, y: pointer.y } : idleTarget(t);
+
+      var dx = target.x - core.x, dy = target.y - core.y;
+      var SPRING = tracking ? SPRING_TRACK : SPRING_IDLE;
+      core.vx = (core.vx + dx * SPRING) * DAMP;
+      core.vy = (core.vy + dy * SPRING) * DAMP;
+      core.x += core.vx;
+      core.y += core.vy;
+
+      var instSpeed = Math.min(40, Math.hypot(core.x - lastPos.x, core.y - lastPos.y));
+      lastPos.x = core.x; lastPos.y = core.y;
+      speed += (instSpeed - speed) * 0.08;
+
+      var breathe = (Math.sin(t * 0.6) * 0.5 + 0.5) * 3;
+      // Halved vs. the standalone study: outer ring and hole cap are both /2.
+      var maxR = Math.min(W, H) * 0.055;
+      var targetHole = Math.min(maxR, 5 + speed * 1.1 + breathe);
+      holeRadius += (targetHole - holeRadius) * 0.12;
+      apertureAngle += (0.3 + speed * 0.06) * (Math.PI / 180) * (16/60);
+
+      ctx.clearRect(0, 0, W, H);
+
+      var grad = ctx.createRadialGradient(core.x, core.y, 0, core.x, core.y, Math.max(W, H) * 0.45);
+      grad.addColorStop(0,   'rgba(233,121,91,0.10)');
+      grad.addColorStop(0.4, 'rgba(124,147,232,0.05)');
+      grad.addColorStop(1,   'rgba(240,180,140,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      for (var i = 0; i < particles.length; i++){
+        var p = particles[i];
+        var baseX = p.bx + Math.sin(t * p.freq + p.phase) * p.amp;
+        var baseY = p.by + Math.cos(t * p.freq * 0.8 + p.phase) * p.amp;
+        var pdx = baseX - core.x, pdy = baseY - core.y;
+        var dist = Math.hypot(pdx, pdy);
+        var pushRadius = 90;
+        var push = dist < pushRadius ? (1 - dist / pushRadius) * 20 : 0;
+        var ux = dist > 0.001 ? pdx / dist : 0;
+        var uy = dist > 0.001 ? pdy / dist : 0;
+        p.x += (baseX + ux * push - p.x) * 0.09;
+        p.y += (baseY + uy * push - p.y) * 0.09;
+
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        // subtle twinkle: two mismatched sine waves beating together, kept
+        // within a narrow range so it reads as "alive" rather than blinking
+        var twinkle = 0.82 + 0.18 * Math.sin(t * p.flickerFreq + p.flickerPhase) * Math.sin(t * p.flickerFreq * 1.7 + p.flickerPhase * 0.6);
+        ctx.globalAlpha = p.alpha * twinkle;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Aperture cursor — outer ring halved from the standalone study (0.16 -> 0.08)
+      var outerR = Math.min(W, H) * 0.08;
+      var blades = 8;
+      var twist = (Math.PI * 2 / blades) * 0.62;
+
+      ctx.save();
+      ctx.translate(core.x, core.y);
+      ctx.rotate(apertureAngle);
+
+      ctx.beginPath();
+      ctx.arc(0, 0, outerR + 3, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(27,23,18,0.16)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      for (var b = 0; b < blades; b++){
+        var outerA0 = (b / blades) * Math.PI * 2;
+        var outerA1 = ((b + 1) / blades) * Math.PI * 2;
+        var innerA0 = outerA0 + twist;
+        var innerA1 = outerA1 + twist;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, outerR, outerA0, outerA1, false);
+        ctx.lineTo(holeRadius * Math.cos(innerA1), holeRadius * Math.sin(innerA1));
+        ctx.arc(0, 0, holeRadius, innerA1, innerA0, true);
+        ctx.closePath();
+
+        var shade = (b % 2 === 0) ? 0.88 : 0.79;
+        ctx.fillStyle = 'rgba(27,23,18,' + shade + ')';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(240,180,140,0.9)';
+      ctx.arc(-holeRadius * 0.3, -holeRadius * 0.3, Math.max(0.8, holeRadius * 0.12), 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  })();
+</script>
+
+</body>
+</html>

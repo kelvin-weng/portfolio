@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aperture — an interactive study</title>
+<meta name="description" content="An interactive aperture and film-grain field that tracks the cursor, or breathes on its own when there isn't one.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesque:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --canvas-bg:#FBF8F3;
+    --ink:#1B1712;
+    --muted:#6F655B;
+    --coral:#E9795B;
+    --coral-ink:#D0563A;
+    --periwinkle:#7C93E8;
+    --peach:#F0B48C;
+    --line:#EAE3D8;
+    --font-display:'Schibsted Grotesk',sans-serif;
+    --font-body:'Hanken Grotesque',system-ui,sans-serif;
+    --font-mono:ui-monospace,'SF Mono',Menlo,monospace;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--canvas-bg); color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+
+  #stage{
+    position:relative;
+    width:100vw; height:100vh;
+    touch-action:none; /* keep touch drags from scrolling the page */
+    cursor:crosshair;
+  }
+
+  canvas{ position:absolute; inset:0; display:block; }
+
+  .hud{
+    position:absolute; z-index:5; pointer-events:none;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .hud.top-left{ top:28px; left:28px; }
+  .hud.bottom-left{ bottom:24px; left:28px; }
+  .hud.top-right{ top:28px; right:28px; text-align:right; }
+
+  .hud .kicker{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--coral-ink); margin:0 0 6px;
+  }
+  .hud h1{
+    font-family:var(--font-display); font-weight:600; font-size:22px;
+    letter-spacing:-.02em; margin:0 0 6px; max-width:320px; line-height:1.15;
+  }
+  .hud p{
+    font-family:var(--font-body); font-size:13.5px; color:var(--muted);
+    margin:0; max-width:280px; line-height:1.5;
+  }
+  .readout{
+    font-family:var(--font-mono); font-size:12px; color:var(--muted);
+    letter-spacing:.02em; background:rgba(255,255,255,.6);
+    backdrop-filter:blur(6px); border:1px solid var(--line);
+    border-radius:8px; padding:8px 12px; pointer-events:none;
+  }
+  .readout b{ color:var(--ink); font-weight:600; }
+  .readout .dot{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--coral); margin-right:6px; position:relative; top:-1px;
+  }
+
+  @media (max-width:640px){
+    .hud.top-left{ top:20px; left:20px; }
+    .hud.bottom-left{ bottom:20px; left:20px; }
+    .hud.top-right{ top:20px; right:20px; }
+    .hud h1{ font-size:19px; max-width:220px; }
+    .hud p{ display:none; } /* keep mobile screen uncluttered */
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="c"></canvas>
+
+  <div class="hud top-left">
+    <div class="kicker">Signature study · 01</div>
+    <h1>Aperture</h1>
+    <p>Move your cursor — the iris opens for speed and settles when you stop. No cursor? It breathes on its own.</p>
+  </div>
+
+  <div class="hud top-right">
+    <div class="readout" id="readout"><span class="dot" id="dot"></span><b id="mode">IDLE DRIFT</b><br>f/<span id="fstop">8.0</span></div>
+  </div>
+
+  <div class="hud bottom-left">
+    <div class="readout" style="font-size:11px;">Touch and drag also works</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var stage  = document.getElementById('stage');
+  var canvas = document.getElementById('c');
+  var ctx    = canvas.getContext('2d');
+  var modeEl = document.getElementById('mode');
+  var fstopEl= document.getElementById('fstop');
+  var dotEl  = document.getElementById('dot');
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var PALETTE = ['#E9795B', '#D0563A', '#7C93E8', '#F0B48C', '#6F655B'];
+
+  // ---------- sizing ----------
+  var W = 0, H = 0, DPR = Math.max(1, window.devicePixelRatio || 1);
+  function resize(){
+    W = stage.clientWidth; H = stage.clientHeight;
+    canvas.width  = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- pointer tracking ----------
+  var pointer = { x: W/2, y: H/2, active: false, lastMove: 0 };
+  var lastPointerPos = { x: W/2, y: H/2 };
+  var speed = 0; // smoothed pixels/frame
+
+  function setPointer(x, y){
+    pointer.x = x; pointer.y = y;
+    pointer.active = true;
+    pointer.lastMove = performance.now();
+  }
+
+  stage.addEventListener('pointermove', function(e){
+    var r = stage.getBoundingClientRect();
+    setPointer(e.clientX - r.left, e.clientY - r.top);
+  });
+  stage.addEventListener('pointerdown', function(e){
+    var r = stage.getBoundingClientRect();
+    setPointer(e.clientX - r.left, e.clientY - r.top);
+  });
+  stage.addEventListener('pointerleave', function(){
+    pointer.active = false;
+  });
+  // touch drags (pointer events already cover most modern touch browsers,
+  // this is a belt-and-suspenders fallback)
+  stage.addEventListener('touchmove', function(e){
+    if (!e.touches || !e.touches[0]) return;
+    var r = stage.getBoundingClientRect();
+    setPointer(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+  }, { passive:true });
+
+  // ---------- idle drift target (used when there's no recent pointer input) ----------
+  function idleTarget(t){
+    // a slow lissajous-ish wander so it never looks like it's on rails
+    var cx = W * 0.5, cy = H * 0.5;
+    var rx = Math.min(W, H) * 0.28;
+    var ry = Math.min(W, H) * 0.20;
+    var speedFactor = reduced ? 0.04 : 0.12;
+    return {
+      x: cx + Math.sin(t * speedFactor) * rx + Math.sin(t * speedFactor * 0.53) * rx * 0.25,
+      y: cy + Math.cos(t * speedFactor * 0.8) * ry + Math.cos(t * speedFactor * 0.31) * ry * 0.3
+    };
+  }
+
+  // ---------- spring-eased "core" position (what the aperture/spotlight chase) ----------
+  var core = { x: W/2, y: H/2, vx: 0, vy: 0 };
+  // Tracking stays snappy; once idle, the aperture eases back to its
+  // drifting position at ~1/3 the speed instead of snapping over.
+  var SPRING_TRACK = 0.045, SPRING_IDLE = 0.015, DAMP = 0.82;
+
+  // ---------- film-grain particles ----------
+  var N_PARTICLES = 90;
+  var particles = [];
+  function seedParticles(){
+    particles = [];
+    for (var i = 0; i < N_PARTICLES; i++){
+      particles.push({
+        bx: Math.random() * W,
+        by: Math.random() * H,
+        x: 0, y: 0,
+        r: 1.1 + Math.random() * 2.6,
+        phase: Math.random() * Math.PI * 2,
+        freq: 0.15 + Math.random() * 0.35,
+        amp: 8 + Math.random() * 18,
+        color: PALETTE[(Math.random() * PALETTE.length) | 0],
+        alpha: 0.25 + Math.random() * 0.5
+      });
+    }
+  }
+  seedParticles();
+  window.addEventListener('resize', seedParticles);
+
+  // ---------- state for aperture ----------
+  var apertureAngle = 0;
+  var holeRadius = 0; // eased
+  var t0 = performance.now();
+
+  function frame(now){
+    var t = (now - t0) / 1000;
+    var tracking = pointer.active && (now - pointer.lastMove) < 1500;
+
+    // pick the point everything chases
+    var target;
+    if (tracking){
+      target = { x: pointer.x, y: pointer.y };
+    } else {
+      target = idleTarget(t);
+    }
+
+    // spring-ease the core toward target (gives the magnetic / jelly feel)
+    var dx = target.x - core.x, dy = target.y - core.y;
+    var SPRING = tracking ? SPRING_TRACK : SPRING_IDLE;
+    core.vx = (core.vx + dx * SPRING) * DAMP;
+    core.vy = (core.vy + dy * SPRING) * DAMP;
+    core.x += core.vx;
+    core.y += core.vy;
+
+    // smoothed speed, used to drive the iris + rotation
+    var instSpeed = Math.min(40, Math.hypot(core.x - lastPointerPos.x, core.y - lastPointerPos.y));
+    lastPointerPos.x = core.x; lastPointerPos.y = core.y;
+    speed += (instSpeed - speed) * 0.08;
+
+    // breathing baseline so it's never fully static even at rest
+    var breathe = reduced ? 0 : (Math.sin(t * 0.6) * 0.5 + 0.5) * 6;
+
+    var maxR = Math.min(W, H) * 0.11;
+    var targetHole = Math.min(maxR, 10 + speed * 2.2 + breathe);
+    holeRadius += (targetHole - holeRadius) * 0.12;
+
+    apertureAngle += (reduced ? 0.15 : (0.3 + speed * 0.06)) * (Math.PI / 180) * (16/60);
+
+    // ---------- draw ----------
+    ctx.clearRect(0, 0, W, H);
+
+    // soft spotlight wash (the successor to the old hero-wash, now alive)
+    var grad = ctx.createRadialGradient(core.x, core.y, 0, core.x, core.y, Math.max(W, H) * 0.55);
+    grad.addColorStop(0,   'rgba(233,121,91,0.16)');
+    grad.addColorStop(0.4, 'rgba(124,147,232,0.08)');
+    grad.addColorStop(1,   'rgba(240,180,140,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // film-grain particles: idle wander + gentle repulsion from the core
+    for (var i = 0; i < particles.length; i++){
+      var p = particles[i];
+      var wanderX = Math.sin(t * p.freq + p.phase) * p.amp;
+      var wanderY = Math.cos(t * p.freq * 0.8 + p.phase) * p.amp;
+      var baseX = p.bx + wanderX;
+      var baseY = p.by + wanderY;
+
+      var pdx = baseX - core.x, pdy = baseY - core.y;
+      var dist = Math.hypot(pdx, pdy);
+      var pushRadius = 150;
+      var push = 0;
+      if (dist < pushRadius){
+        push = (1 - dist / pushRadius) * 34;
+      }
+      var ux = dist > 0.001 ? pdx / dist : 0;
+      var uy = dist > 0.001 ? pdy / dist : 0;
+
+      p.x += (baseX + ux * push - p.x) * 0.09;
+      p.y += (baseY + uy * push - p.y) * 0.09;
+
+      ctx.beginPath();
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // ---------- aperture iris ----------
+    var outerR = Math.min(W, H) * 0.16;
+    var blades = 7;
+    // Angular skew applied to each blade's inner (cutting) edge relative to
+    // its outer edge. Real iris blades pivot near the housing rim, so their
+    // inner edge sweeps at an angle rather than sitting on a plain radius —
+    // this twist is what actually reads as "blades" instead of pie wedges.
+    var twist = (Math.PI * 2 / blades) * 0.62;
+
+    ctx.save();
+    ctx.translate(core.x, core.y);
+    ctx.rotate(apertureAngle);
+
+    // housing ring
+    ctx.beginPath();
+    ctx.arc(0, 0, outerR + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(27,23,18,0.14)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // blades: outer edge follows the housing ring (full circle, no gaps),
+    // inner cutting edge is angularly twisted — together they tile into a
+    // pinwheel opening the way real diaphragm blades overlap.
+    for (var b = 0; b < blades; b++){
+      var outerA0 = (b / blades) * Math.PI * 2;
+      var outerA1 = ((b + 1) / blades) * Math.PI * 2;
+      var innerA0 = outerA0 + twist;
+      var innerA1 = outerA1 + twist;
+
+      ctx.beginPath();
+      ctx.arc(0, 0, outerR, outerA0, outerA1, false);
+      ctx.lineTo(holeRadius * Math.cos(innerA1), holeRadius * Math.sin(innerA1));
+      ctx.arc(0, 0, holeRadius, innerA1, innerA0, true);
+      ctx.closePath();
+
+      // alternating shade so individual blades read distinctly, like metal
+      // catching light at slightly different angles
+      var shade = (b % 2 === 0) ? 0.88 : 0.79;
+      ctx.fillStyle = 'rgba(27,23,18,' + shade + ')';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+      ctx.lineWidth = 0.75;
+      ctx.stroke();
+    }
+
+    // lens glint
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(240,180,140,0.9)';
+    ctx.arc(-holeRadius * 0.3, -holeRadius * 0.3, Math.max(1.5, holeRadius * 0.12), 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+
+    // ---------- HUD readout ----------
+    var fstopValue = (16 - (holeRadius / maxR) * 14).toFixed(1);
+    fstopEl.textContent = fstopValue;
+    modeEl.textContent = tracking ? 'TRACKING' : 'IDLE DRIFT';
+    dotEl.style.background = tracking ? '#E9795B' : '#7C93E8';
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>

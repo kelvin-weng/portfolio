@@ -1,8 +1,9 @@
 .DS_Store
 .claude/settings.local.json
 
-# Raw camera originals (unreferenced by site; only images/web/*.jpg is used)
-images/*.JPG
-images/*.jpeg
-images/*.jpg
-!images/web/
+# Raw camera originals (unreferenced by site; only assets/images/optimized/*.jpg is used)
+assets/images/originals/
+
+# Local dev/reference material — not part of the published site
+Copy (Do Not Touch)/
+Reference Files/

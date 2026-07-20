@@ -98,7 +98,7 @@
   .nav-cta{
     background:var(--ink); color:#fff; border:none; border-radius:999px;
     padding:10px 20px; font:600 14px/1 var(--font-body); cursor:pointer;
-    flex-shrink:0; white-space:nowrap;
+    flex-shrink:0; white-space:nowrap; display:inline-block; text-decoration:none;
   }
   .nav-toggle{
     display:none;
@@ -163,6 +163,7 @@
     .nav-mobile-panel a:last-of-type{ border-bottom:none; }
     .nav-mobile-panel .nav-cta{
       display:block; width:100%; text-align:center; margin-top:14px; margin-bottom:18px;
+      color:#fff; border-bottom:none;
       opacity:0; transform:translateY(-6px);
       transition:opacity .28s ease, transform .28s ease;
     }
@@ -265,7 +266,7 @@
       <a href="assets/files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
     </nav>
 
-    <button class="nav-cta" type="button">Get in touch</button>
+    <a class="nav-cta" href="mailto:kelvin.weng@outlook.com?subject=Let's%20connect">Get in touch</a>
 
     <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navMobilePanel" aria-label="Toggle menu">
       <span></span>
@@ -280,7 +281,7 @@
       <a href="projects.html">Projects</a>
       <a href="blog.html" class="is-active">Blog</a>
       <a href="assets/files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
-      <button class="nav-cta" type="button">Get in touch</button>
+      <a class="nav-cta" href="mailto:kelvin.weng@outlook.com?subject=Let's%20connect">Get in touch</a>
     </div>
   </nav>
 </header>

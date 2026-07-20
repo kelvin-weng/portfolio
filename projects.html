@@ -98,7 +98,7 @@
   .nav-cta{
     background:var(--ink); color:#fff; border:none; border-radius:999px;
     padding:10px 20px; font:600 14px/1 var(--font-body); cursor:pointer;
-    flex-shrink:0; white-space:nowrap;
+    flex-shrink:0; white-space:nowrap; display:inline-block; text-decoration:none;
   }
   .nav-toggle{
     display:none;
@@ -163,6 +163,7 @@
     .nav-mobile-panel a:last-of-type{ border-bottom:none; }
     .nav-mobile-panel .nav-cta{
       display:block; width:100%; text-align:center; margin-top:14px; margin-bottom:18px;
+      color:#fff; border-bottom:none;
       opacity:0; transform:translateY(-6px);
       transition:opacity .28s ease, transform .28s ease;
     }
@@ -299,7 +300,7 @@
       <a href="assets/files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
     </nav>
 
-    <button class="nav-cta" type="button">Get in touch</button>
+    <a class="nav-cta" href="mailto:kelvin.weng@outlook.com?subject=Let's%20connect">Get in touch</a>
 
     <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navMobilePanel" aria-label="Toggle menu">
       <span></span>
@@ -314,7 +315,7 @@
       <a href="projects.html" class="is-active">Projects</a>
       <a href="blog.html">Blog</a>
       <a href="assets/files/Kelvin-Weng-Resume.pdf" target="_blank" rel="noopener noreferrer">Résumé</a>
-      <button class="nav-cta" type="button">Get in touch</button>
+      <a class="nav-cta" href="mailto:kelvin.weng@outlook.com?subject=Let's%20connect">Get in touch</a>
     </div>
   </nav>
 </header>
@@ -327,7 +328,7 @@
 
       <div class="page-head">
         <h1>Projects</h1>
-        <p>A working index of things I've built, shot, and cut — data products, street frames, and the odd video edit.</p>
+        <p>A working index of things I've built, shot, and cut.</p>
       </div>
 
       <div class="filter-row" role="tablist" aria-label="Filter projects by category">
@@ -339,58 +340,28 @@
 
       <div class="project-grid" id="projectGrid">
 
-        <a class="ptile" href="#" data-category="product">
-          <div class="ptile-ph" aria-hidden="true">PRODUCT</div>
-          <span class="ptile-cat-badge">Product</span>
-          <div class="ptile-info"><h3>Data Governance Metamodel</h3></div>
-        </a>
-
-        <a class="ptile" href="#" data-category="photo">
-          <div class="ptile-ph" aria-hidden="true">PHOTO</div>
+        <a class="ptile" href="projects/arthur-turns-one.html" data-category="photo">
+          <img class="ptile-thumb" src="assets/images/optimized/arthur-turns-one/arthur-01.jpg" alt="" loading="lazy">
           <span class="ptile-cat-badge">Photo</span>
-          <div class="ptile-info"><h3>Sydney Streets, Vol. 1</h3></div>
+          <div class="ptile-info"><h3>Arthur Turns One</h3></div>
         </a>
 
         <a class="ptile" href="projects/gold-coast-marathon-weekend-2025.html" data-category="video">
-          <img class="ptile-thumb" src="https://img.youtube.com/vi/wdMXXW5CKQU/hqdefault.jpg" alt="" loading="lazy">
+          <img class="ptile-thumb" src="assets/images/optimized/gold-coast-marathon-weekend-2025/thumbnail.jpg" alt="" loading="lazy">
           <span class="ptile-cat-badge">Video</span>
           <div class="ptile-info"><h3>Gold Coast Marathon Weekend 2025</h3></div>
         </a>
 
-        <a class="ptile" href="#" data-category="product">
-          <div class="ptile-ph" aria-hidden="true">PRODUCT</div>
-          <span class="ptile-cat-badge">Product</span>
-          <div class="ptile-info"><h3>Collibra Workflow Builder</h3></div>
-        </a>
-
-        <a class="ptile" href="#" data-category="photo">
-          <div class="ptile-ph" aria-hidden="true">PHOTO</div>
+        <a class="ptile" href="projects/cadence.html" data-category="photo">
+          <img class="ptile-thumb" src="assets/images/optimized/cadence/cadence-01.jpg" alt="" loading="lazy">
           <span class="ptile-cat-badge">Photo</span>
-          <div class="ptile-info"><h3>Harbour Light Studies</h3></div>
+          <div class="ptile-info"><h3>Cadence</h3></div>
         </a>
 
         <a class="ptile" href="projects/cheung-chau-montage.html" data-category="video">
-          <img class="ptile-thumb" src="https://img.youtube.com/vi/YK_3xwVKEeU/hqdefault.jpg" alt="" loading="lazy">
+          <img class="ptile-thumb" src="assets/images/optimized/cheung-chau-montage/thumbnail.jpg" alt="" loading="lazy">
           <span class="ptile-cat-badge">Video</span>
           <div class="ptile-info"><h3>Cheung Chau Montage</h3></div>
-        </a>
-
-        <a class="ptile" href="#" data-category="product">
-          <div class="ptile-ph" aria-hidden="true">PRODUCT</div>
-          <span class="ptile-cat-badge">Product</span>
-          <div class="ptile-info"><h3>Risk Taxonomy Explorer</h3></div>
-        </a>
-
-        <a class="ptile" href="#" data-category="photo">
-          <div class="ptile-ph" aria-hidden="true">PHOTO</div>
-          <span class="ptile-cat-badge">Photo</span>
-          <div class="ptile-info"><h3>Night Market Frames</h3></div>
-        </a>
-
-        <a class="ptile" href="#" data-category="video">
-          <div class="ptile-ph" aria-hidden="true">VIDEO</div>
-          <span class="ptile-cat-badge">Video</span>
-          <div class="ptile-info"><h3>Behind the Frame</h3></div>
         </a>
 
       </div>

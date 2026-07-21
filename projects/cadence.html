@@ -246,7 +246,7 @@
   }
 
   .cadence-quote{
-    grid-column:span 2; align-self:stretch; margin:0;
+    grid-column:span 2; align-self:stretch; margin:0; min-height:220px;
     display:flex; flex-direction:column; justify-content:center;
     background:var(--surface); border:1px solid var(--line); border-radius:16px;
     padding:44px 56px; text-align:center;
@@ -265,7 +265,7 @@
   .cadence-quote figcaption cite{ font-style:normal; color:var(--subtle); }
 
   .cadence-ig{
-    grid-column:span 1; align-self:stretch;
+    grid-column:span 1; align-self:stretch; min-height:160px;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
     background:var(--ink); color:#fff; border-radius:16px;
     padding:28px 20px; text-align:center;
@@ -594,11 +594,15 @@
       }
 
       // Reset the two trailing items to their natural size before measuring —
-      // both the row-span AND the explicit height set by a previous run —
-      // so that leftover value isn't mistaken for "natural" height and
-      // compounded on this run.
-      if (ig){ ig.style.gridRowEnd = 'auto'; ig.style.height = ''; }
-      if (quote){ quote.style.gridRowEnd = 'auto'; quote.style.height = ''; }
+      // the row-span AND explicit height from a previous run, so a leftover
+      // value isn't mistaken for "natural" height and compounded on this run.
+      // align-self is also forced to "start" for the measurement: some
+      // browsers don't reliably protect a stretched grid item's minimum size
+      // against its own content, so measuring while stretch is still active
+      // can read back a too-small height. Disabling stretch during
+      // measurement sidesteps that regardless of browser behavior.
+      if (ig){ ig.style.gridRowEnd = 'auto'; ig.style.height = ''; ig.style.alignSelf = 'start'; }
+      if (quote){ quote.style.gridRowEnd = 'auto'; quote.style.height = ''; quote.style.alignSelf = 'start'; }
 
       // Pass 1: measure every item's natural height first, then apply spans
       // in a separate loop — so an earlier mutation can't skew a later
@@ -609,6 +613,11 @@
       items.forEach(function(item, i){
         item.style.gridRowEnd = 'span ' + spanFor(naturalHeights[i]);
       });
+
+      // Stretch can resume now that both items have a span sized to at least
+      // their true content height.
+      if (ig) ig.style.alignSelf = '';
+      if (quote) quote.style.alignSelf = '';
 
       // Pass 2: the Instagram tile should end flush with picture 08, and the
       // quote card should end flush with picture 10 — stretch each (never
@@ -646,6 +655,14 @@
         });
       });
       layout();
+    }
+
+    // The quote/Instagram card heights are measured from rendered text, so if
+    // the custom webfont swaps in after that first measurement, the text can
+    // reflow to more lines than the box was sized for — most noticeable on
+    // narrow screens where lines wrap more easily. Re-run once fonts settle.
+    if (document.fonts && document.fonts.ready){
+      document.fonts.ready.then(layout);
     }
 
     var resizeTimer;
